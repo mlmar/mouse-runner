@@ -1,0 +1,9 @@
+{
+  "short_name": "multiply",
+  "name": "multiply",
+  "start_url": "https://mlmar.github.io/multiply/index.html",
+  "scope": "https://mlmar.github.io/multiply/index.html",
+  "display": "standalone",
+  "theme_color": "#212121",
+  "background_color": "#eaeaea"
+}

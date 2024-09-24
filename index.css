@@ -1,0 +1,55 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    touch-action: manipulation !important;
+}
+
+html {
+    position: fixed;
+}
+
+html,
+body {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+/* FLEX */
+.flex,
+.flex-col {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-fit {
+    flex: 1 0 auto;
+}
+
+.flex-fill {
+    flex: 1 1;
+}
+
+.flex-center {
+    align-items: center;
+}
+
+.flex-middle {
+    justify-content: center;
+}
+
+.flex-space-between {
+    justify-content: space-between;
+}
+
+/* app */
+#canvas-main {
+    outline: .1em solid red;
+}
