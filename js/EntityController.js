@@ -8,15 +8,26 @@ export function createEntityController() {
             return warn('Unable to add null entity');
         }
 
-        const { 
-            id = crypto.randomUUID(),
-            x,
-            y,
-            radius,
-            fill,
-            active = true
-        } = props;
-        _entities.push({ id, x, y, radius, fill, active });
+        const entity = {
+            id: crypto.randomUUID(),
+            color: 'black',
+            active: false,
+            radius: props.radius,
+            mass: 5,
+            speed: 1,
+            position: {
+                x: 0,
+                y: 0,
+            },
+            velocity: {
+                x: 0,
+                y: 0
+            },
+            ...props
+        }
+
+        _entities.push(entity);
+        return entity;
     }
 
     /**
@@ -34,7 +45,7 @@ export function createEntityController() {
     function getAll() {
         return _entities;
     }
-    
+
     return {
         add,
         remove,

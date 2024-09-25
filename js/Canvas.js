@@ -1,7 +1,7 @@
 import { warn } from './Logger.js';
 
 const DEFAULT_STATE = {
-    scale: 15,
+    scale: 1,
     width: 500,
     height: 500,
     backgroundColor: 'black',
@@ -15,15 +15,20 @@ export function createCanvas(canvas, props) {
         ...props
     }
 
+    function get() {
+        return _state;
+    }
+
     function drawCircle(props) {
         if(!props) {
             return warn('Unable to draw null item');
         }
-        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = true } = props;
+        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = true, alpha = 1} = props;
         const origX = x;
         const origY = y;
         
         scale();
+        _ctx.globalAlpha = alpha;
         _ctx.beginPath()
         _ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 
@@ -38,12 +43,28 @@ export function createCanvas(canvas, props) {
             _ctx.stroke()
         }
 
+        _ctx.globalAlpha = 1;
         resetScale();
 
         if(marker) {
             _ctx.fillStyle = 'red';
             _ctx.fillRect(origX * _state.scale - 1, origY * _state.scale - 1, 3, 3);
         }
+    }
+
+    function drawRect(props) {
+        if(!props) {
+            return warn('Unable to draw null item');
+        }
+        let { x, y, width, height, fill = 'black', alpha = 1 } = props;
+        scale();
+        _ctx.globalAlpha = alpha;
+
+        _ctx.fillStyle = fill;
+        _ctx.fillRect(x, y, width, height);
+
+        _ctx.globalAlpha = 1;
+        resetScale();
     }
 
     function scale() {
@@ -54,14 +75,28 @@ export function createCanvas(canvas, props) {
         _ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
+    function clear() {
+        drawRect({
+            x: 0,
+            y: 0,
+            width: _state.width,
+            height: _state.height,
+            fill: _state.backgroundColor
+        });
+    }
+
     function refresh() {
         canvas.width = _state.width * _state.scale;
         canvas.height = _state.height * _state.scale;
+        clear();
     }
     refresh();
 
     return {
+        get,
         drawCircle,
-        scale
+        drawRect,
+        refresh,
+        clear
     }
 }
