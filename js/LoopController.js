@@ -1,6 +1,7 @@
 import  Logger from './Logger.js';
 
 const DEFAULT_STATE = {
+    id: null,
     inProgress: false,
     tickSpeedMultiplier: 5,
     tickSpeed: 0,
@@ -22,19 +23,22 @@ export function createLoopController(callback) {
         if(_state.inProgress) {
             return error('loop already in progress');
         }
-
+        
         if(!(callback instanceof Function)) {
             return error('Provided callback is not a function');
         }
-
-        Logger.log('Starting loop')
+        
+        Logger.log('Starting loop', _state.id)
+        _state.id = crypto.randomUUID();
         _state.inProgress = true;
+        _state.lastRender = 0;
         _currentLoop = window.requestAnimationFrame(handleLoop)
     }
 
     function stop() {
+        Logger.log('Ending loop', _state.id)
         window.cancelAnimationFrame(_currentLoop);
-        _state.inProgress = true;
+        _state.inProgress = false;
         _state = {
             ...DEFAULT_STATE
         }
@@ -51,7 +55,9 @@ export function createLoopController(callback) {
         callback(_state);
         _state.lastRender = _state.time;
       
-        window.requestAnimationFrame(handleLoop)
+        if(_state.inProgress) {
+            _currentLoop = window.requestAnimationFrame(handleLoop)
+        }
     }
 
     return {

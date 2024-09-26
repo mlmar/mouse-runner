@@ -7,11 +7,13 @@ export function random(min, max, floor) {
 }
 
 export const COLORS = [
-    'lightcoral', 
+    'crimson', 
     'lightseagreen', 
     'orange',
     'cornflowerblue',
-    'ghostwhite'
+    'purple',
+    'antiquewhite',
+    'darkblue'
 ]
 
 export function getRandomColor() {

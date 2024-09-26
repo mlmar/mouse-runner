@@ -19,8 +19,14 @@ const BACKGROUND = {
     fill: 'black',
 }
 
-const SPEED_MULTIPLIER = .08;
+const SPEED_MULTIPLIER = .075;
 const RADIUS = 1.4;
+
+const DEFAULT_STATE = {
+    inProgress: false,
+    targetColor: null,
+    score: 0,
+}
 
 export function createGameController({ canvas }) {
     const entityController = createEntityController();
@@ -35,11 +41,17 @@ export function createGameController({ canvas }) {
             const entities = entityController.getAll();
             let isCollided = false;
             entities.forEach((entity) => {
-                if(entityController.hasCollided(_mouseEntity, entity)) { // if mouse entity collides with this entity
+                const hasHistory = _mouseEntity.history.length > _mouseEntity.historyLength / 2;
+                if(hasHistory && entityController.hasCollided(_mouseEntity, entity)) { // if mouse entity collides with this entity
                     if(_state.targetColor === entity.color) {
                         entity.active = false;
+                        _mouseEntity.history = []; // clear history
                         _entitiesToRemove.push(entity);
-                        createEntites(2);
+                        if(_state.score % 2) {
+                            createEntities(1);
+                        } else {
+                            createEntities(2);
+                        }
                         refreshTargetColor();
                         _state.score++;
                     } else {
@@ -54,14 +66,13 @@ export function createGameController({ canvas }) {
             }
         }
     });
+    mouseTracker.start();
     
-    let _mouseEntity = null;
+    let _mouseEntity = entityController.create({ radius: 1.5, speed: .01, color: 'red' });
     let _entitiesToRemove = [];
 
-    const _state = {
-        inProgress: false,
-        targetColor: null,
-        score: 0,
+    let _state = {
+        ...DEFAULT_STATE
     }
 
     function get() {
@@ -69,9 +80,12 @@ export function createGameController({ canvas }) {
     }
 
     function start() {
-        _state.inProgress = true;
-        _mouseEntity = entityController.create({ radius: 1, color: 'red' });
-        createEntites(1);
+        _state = {
+            ...DEFAULT_STATE,
+            inProgress: true
+        }
+        entityController.removeAll()
+        createEntities(1);
         refreshTargetColor();
     }
 
@@ -82,10 +96,9 @@ export function createGameController({ canvas }) {
 
     function refreshTargetColor() {
         _state.targetColor = entityController.getRandom().color;
-        _mouseEntity.stroke
     }
 
-    function createEntites(limit) {
+    function createEntities(limit) {
         Logger.log('Creating', limit, 'random entities');
         const entities = entityController.getActive().slice(0);
         for(let i = 0; i < limit; i++) {
@@ -122,9 +135,12 @@ export function createGameController({ canvas }) {
                     updateEntityCollisions(entity, i);
                     entityController.updateEntityPosition(entity, tickSpeed);
                     updateEntityEdgeCollision(entity);
-                    if(entityController.hasCollided(_mouseEntity, entity) && _state.targetColor !== entity.color) { // if mouse entity collides with this entity
-                        entity.color = 'red';
-                        stop();
+                    if(_mouseEntity.active) {
+                        const hasHistory = _mouseEntity.history.length > _mouseEntity.historyLength / 2;
+                        if(hasHistory && entityController.hasCollided(_mouseEntity, entity) && _state.targetColor !== entity.color) { // if mouse entity collides with this entity
+                            entity.color = 'red';
+                            stop();
+                        }
                     }
                 }
                 renderEntity(entity);
@@ -149,8 +165,8 @@ export function createGameController({ canvas }) {
                 continue;
             }
 
-            entityA.speed = Math.max(entityA.speed, entityB.speed); // take max speed on collision
-            entityB.speed = entityA.speed;
+            // entityA.speed = Math.max(entityA.speed, entityB.speed); // take max speed on collision
+            // entityB.speed = entityA.speed;
             
             let vImpact = VectorUtil.sub(entityB.position, entityA.position); // velocity at impact
             let distance = VectorUtil.mag(vImpact);
@@ -241,10 +257,10 @@ export function createGameController({ canvas }) {
             const scalar =  i / frequency;
             canvasController.drawCircle({
                 fill: entity.color,
-                radius: scalar / frequencyLength * entity.radius,
+                radius: random(scalar, scalar+2) / frequencyLength * entity.radius,
                 alpha: scalar / (frequencyLength * frequency * frequency),
-                x,
-                y
+                x: x + random(-entity.speed, entity.speed),
+                y: y+ random(-entity.speed, entity.speed)
             });
         }
     }
@@ -253,12 +269,15 @@ export function createGameController({ canvas }) {
         canvasController.drawRect(BACKGROUND);
     }
 
+    function update(tickSpeed) {
+        renderBackground();
+        updateEntities(tickSpeed);
+    }
+
     return {
         start,
         stop,
-        createEntites,
-        updateEntities,
+        update,
         get,
-        renderBackground
     }
 }

@@ -51,6 +51,10 @@ export function createEntityController() {
         }
     }
 
+    function removeAll() {
+        _entities.splice(0, _entities.length);
+    }
+
     function updateEntityPosition(entity, tickSpeed) {
         const adjustedVelocity = VectorUtil.scale(entity.velocity, tickSpeed);
         entity.position = VectorUtil.add(entity.position, adjustedVelocity);
@@ -90,6 +94,7 @@ export function createEntityController() {
         create,
         add,
         remove,
+        removeAll,
         getAll,
         getActive,
         getRandom,

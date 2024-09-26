@@ -5,5 +5,6 @@ export default {
     MOUSE_DOWN: 'mousedown',
     MOUSE_ENTER: 'mouseenter',
     MOUSE_LEAVE: 'mouseleave',
+    CLICK: 'click',
     CONTEXT_MENU: 'contextmenu'
 }

@@ -16,6 +16,7 @@ export function createMouseTracker({ el, scale = 1, onClick }) {
         [Events.MOUSE_MOVE]: (event) => {
             _state.absolutePosition.x = event.pageX;
             _state.absolutePosition.y = event.pageY;
+            refreshIsOver();
             updateRelativePosition();
         },
         [Events.MOUSE_DOWN]: (event) => {
@@ -35,35 +36,17 @@ export function createMouseTracker({ el, scale = 1, onClick }) {
             event.preventDefault();
         },
     }
-
-    const elementListeners = {
-        [Events.MOUSE_ENTER]: () => {
-            _state.isOver = true;
-        },
-        [Events.MOUSE_LEAVE]: () => {
-            _state.isOver = false;
-        },
-    }
-
-    function addListeners() {
-        removeEventListeners();
+    
+    function addEventListeners() {
         Logger.log('Adding listeners to document', el);
         const documentEvents = [Events.MOUSE_MOVE, Events.MOUSE_DOWN, Events.MOUSE_UP, Events.CONTEXT_MENU];
         documentEvents.forEach((event) => document.addEventListener(event, documentListeners[event]));
-        
-        Logger.log('Adding listeners listeners to element', el);
-        const elementEvents = [Events.MOUSE_ENTER, Events.MOUSE_LEAVE];
-        elementEvents.forEach((event) => el.addEventListener(event, elementListeners[event]));
     }
 
     function removeEventListeners() {
         Logger.log('Removing listeners listeners from document', el);
         const documentEvents = [Events.MOUSE_MOVE, Events.MOUSE_DOWN, Events.MOUSE_UP];
         documentEvents.forEach((event) => document.removeEventListener(event, documentListeners[event]));
-        
-        Logger.log('Removing listeners listeners from element', el);
-        const elementEvents = [Events.MOUSE_ENTER, Events.MOUSE_LEAVE];
-        elementEvents.forEach((event) => el.removeEventListener(event, elementListeners[event]));
     }
 
     function updateRelativePosition() {
@@ -73,14 +56,27 @@ export function createMouseTracker({ el, scale = 1, onClick }) {
         _state.position.y = translatedPostion.y / scale;
     }
 
+    function refreshIsOver() {
+        _state.isOver = el.matches(':hover');
+    }
+
+    function start() {
+        refreshIsOver();
+        removeEventListeners();
+        addEventListeners();
+    }
+
+    function stop() {
+        removeEventListeners();
+    }
+
     function get() {
         return _state;
     }
     
-    addListeners();
     return {
         get,
-        addListeners,
-        removeEventListeners
+        start,
+        stop
     }
 }
