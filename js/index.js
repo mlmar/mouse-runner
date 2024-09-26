@@ -1,49 +1,29 @@
-import { log } from './Logger.js';
+import Logger from './Logger.js';
 import { createGameController } from './GameController.js';
-import { createCanvas } from './canvas.js';
-import { createEntityController } from './EntityController.js';
-import { createLoop } from './Looper.js';
-import { random } from './Util.js';
+import { createLoopController } from './LoopController.js';
+import Events from './Events.js';
 
-const EVENTS = {
-    DOM_CONTENT_LOADED: 'DOMContentLoaded'
-}
+window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
+    Logger.log('DOM fully loaded and parsed');
 
-const CANVAS_PROPS = {
-    scale: 10,
-    width: 60,
-    height: 60
-}
-
-const BACKGROUND = {
-    x: 0,
-    y: 0,
-    width: CANVAS_PROPS.width,
-    height: CANVAS_PROPS.height,
-    fill: 'black',
-    alpha: .05
-}
-
-const colors = ['red', 'green', 'blue', 'yellow'];
-
-window.addEventListener(EVENTS.DOM_CONTENT_LOADED, function() {
-    log('DOM fully loaded and parsed');
-
-    const canvas = createCanvas(document.querySelector('#canvas-main'), CANVAS_PROPS);
+    const canvas = document.querySelector('#canvas-main');
+    const gameController = createGameController({ canvas });
+    gameController.start();
     
-    const entityController = createEntityController();
-    for(let i = 0; i < 4; i++) {
-        const color = colors[i];
-        entityController.add({ radius: 2, color, speed: .7 });
-    }
-
-    const gameController = createGameController({ canvas, entityController });
-
-    const gameLoop = createLoop((state) => {
-        canvas.drawRect(BACKGROUND);
+    const labelElement = document.querySelector('#label-score');
+    const gameLoop = createLoopController((state) => {
+        gameController.renderBackground();
         gameController.updateEntities(state.tickSpeed);
+
+        const { inProgress, score, targetColor } = gameController.get();
+        canvas.style.outline = `.1em solid ${targetColor}`;
+
+        labelElement.style.color = targetColor;
+        labelElement.querySelector('span').innerText = score;
+
+        if(!inProgress) {
+            gameLoop.stop();
+        }
     });
     gameLoop.start();
 });
-
-

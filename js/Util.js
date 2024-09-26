@@ -5,3 +5,16 @@ export function random(min, max, floor) {
     }
     return num;
 }
+
+export const COLORS = [
+    'lightcoral', 
+    'lightseagreen', 
+    'orange',
+    'cornflowerblue',
+    'ghostwhite'
+]
+
+export function getRandomColor() {
+    const i = random(0, COLORS.length, true);
+    return COLORS[i];
+}

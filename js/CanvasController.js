@@ -1,4 +1,4 @@
-import { warn } from './Logger.js';
+import Logger from './Logger.js';
 
 const DEFAULT_STATE = {
     scale: 1,
@@ -7,7 +7,7 @@ const DEFAULT_STATE = {
     backgroundColor: 'black',
 }
 
-export function createCanvas(canvas, props) {
+export function createCanvasController(canvas, props) {
     const _ctx = canvas.getContext('2d');
     
     let _state = {
@@ -19,27 +19,31 @@ export function createCanvas(canvas, props) {
         return _state;
     }
 
+    function getCanvas() {
+        return canvas;
+    }
+
     function drawCircle(props) {
         if(!props) {
-            return warn('Unable to draw null item');
+            return Logger.warn('Unable to draw null item');
         }
-        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = true, alpha = 1} = props;
+        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = false, alpha = 1} = props;
         const origX = x;
         const origY = y;
         
         scale();
         _ctx.globalAlpha = alpha;
-        _ctx.beginPath()
+        _ctx.beginPath();
         _ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
 
         if(fill) {
-            _ctx.fillStyle = fill
-            _ctx.fill()
+            _ctx.fillStyle = fill;
+            _ctx.fill();
         }
 
         if(stroke) {
-            _ctx.lineWidth = strokeWidth
-            _ctx.strokeStyle = stroke
+            _ctx.lineWidth = strokeWidth;
+            _ctx.strokeStyle = stroke;
             _ctx.stroke()
         }
 
@@ -90,10 +94,11 @@ export function createCanvas(canvas, props) {
         canvas.height = _state.height * _state.scale;
         clear();
     }
-    refresh();
 
+    refresh();
     return {
         get,
+        getCanvas,
         drawCircle,
         drawRect,
         refresh,

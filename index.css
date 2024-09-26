@@ -50,3 +50,18 @@ body {
 }
 
 /* app */
+body {
+    background: black;
+}
+
+#canvas-main {
+    cursor: none;
+    outline: .1em solid white;
+}
+
+#label-score {
+    color: white;
+    font-weight: bold;
+    font-size: 2.5em;
+    padding-bottom: .1em;
+}

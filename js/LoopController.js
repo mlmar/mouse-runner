@@ -1,8 +1,8 @@
-import { log, error } from './Logger.js';
+import  Logger from './Logger.js';
 
 const DEFAULT_STATE = {
     inProgress: false,
-    tickSpeedMultiplier: 16,
+    tickSpeedMultiplier: 5,
     tickSpeed: 0,
     lastRender: 0,
     elapsed: 0,
@@ -11,7 +11,7 @@ const DEFAULT_STATE = {
 /**
  * @returns Default loop object
  */
-export function createLoop(callback) {
+export function createLoopController(callback) {
     let _currentLoop = null;
 
     let _state = {
@@ -27,7 +27,7 @@ export function createLoop(callback) {
             return error('Provided callback is not a function');
         }
 
-        log('Starting loop')
+        Logger.log('Starting loop')
         _state.inProgress = true;
         _currentLoop = window.requestAnimationFrame(handleLoop)
     }
