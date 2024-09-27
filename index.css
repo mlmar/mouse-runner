@@ -149,7 +149,8 @@ body {
 }
 
 #leaderboard #input-name::placeholder {
-    color: white;
+    color: inherit;
+    opacity: .5;
 }
 
 #leaderboard #input-color {

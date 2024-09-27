@@ -64,7 +64,7 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     function toggleOverlay(show) {
         El.visible(startElement, show);
         El.visible(highScoreElement, show);
-        El.visible(shareElement, scoreTracker.get().highScore > 0);
+        El.visible(shareElement, show);
         if(show) {
             El.css(canvasElement, { cursor: '' });
             El.on(document, Events.MOUSE_DOWN, startGame);

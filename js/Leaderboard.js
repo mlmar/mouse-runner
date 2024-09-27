@@ -72,6 +72,7 @@ export function createLeaderboard(el) {
 
     function refreshColor() {
         colorElement.value = _state.color;
+        refreshName();
     }
 
     function refreshSubmitButton() {
