@@ -54,26 +54,28 @@ body {
     background: black;
 }
 
-#canvas-main {
-    outline: .3em solid white;
+#app {
+    position: relative;
+    border: .8em solid white;
+    transition: border .5s ease;
 }
 
 #label-score {
+    position: absolute;
+    top: 0;
     color: white;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 2.5em;
-    padding-bottom: .1em;
+    padding: 1em;
+    transition: color .5s ease;
 }
 
-.app {
-    position: relative;
-}
-
-.menu {
+#menu {
     position: absolute;
     color: white;
-    font-weight: bold;
-    font-size: 2.5em;
+    font-weight: 900;
+    font-size: 2em;
     bottom: 0;
     padding: 1em;
+    transition: color .5s ease;
 }

@@ -1,21 +1,22 @@
 import Logger from './Logger.js';
+import VectorUtil from './VectorUtil.js';
 import { createCanvasController } from './CanvasController.js';
 import { createEntityController } from './EntityController.js';
 import { createMouseTracker } from './MouseTracker.js';
 import { getRandomColor, random } from './Util.js';
-import VectorUtil from './VectorUtil.js';
 
 const CANVAS_PROPS = {
-    scale: 10,
-    width: 80,
-    height: 80
+    scale: 20,
+    absoluteWidth: 800,
+    absoluteHeight: 800,
+    fitToParent: true
 }
 
 const BACKGROUND = {
     x: 0,
     y: 0,
-    width: CANVAS_PROPS.width,
-    height: CANVAS_PROPS.height,
+    width: CANVAS_PROPS.absoluteWidth,
+    height: CANVAS_PROPS.absoluteHeight,
     fill: 'black',
 }
 
@@ -68,7 +69,7 @@ export function createGameController({ canvas }) {
     });
     mouseTracker.start();
     
-    let _mouseEntity = entityController.create({ radius: 1.5, speed: .01, color: 'red' });
+    let _mouseEntity = entityController.create({ radius: 1.5, speed: .01, color: 'red', active: true });
     let _entitiesToRemove = [];
 
     let _state = {
@@ -118,10 +119,9 @@ export function createGameController({ canvas }) {
     }
 
     function updateMouseEntity() {
-        const { position, isOver } = mouseTracker.get();
+        const { position } = mouseTracker.get();
         _mouseEntity.position.x = position.x;
         _mouseEntity.position.y = position.y;
-        _mouseEntity.active = isOver;
         entityController.updateEntityPosition(_mouseEntity);
         updateEntityEdgeCollision(_mouseEntity);
     }
@@ -239,6 +239,7 @@ export function createGameController({ canvas }) {
     function renderEntity(entity) {
         if(entity.active) {
             canvasController.drawCircle({
+                scale: CANVAS_PROPS.scale,
                 fill: entity.color,
                 radius: entity.radius,
                 stroke: entity.stroke,
@@ -260,7 +261,7 @@ export function createGameController({ canvas }) {
                 radius: random(scalar, scalar+2) / frequencyLength * entity.radius,
                 alpha: scalar / (frequencyLength * frequency * frequency),
                 x: x + random(-entity.speed, entity.speed),
-                y: y+ random(-entity.speed, entity.speed)
+                y: y + random(-entity.speed, entity.speed)
             });
         }
     }

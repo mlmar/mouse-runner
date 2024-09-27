@@ -1,9 +1,12 @@
+import El from './El.js';
 import Logger from './Logger.js';
 
 const DEFAULT_STATE = {
     scale: 1,
-    width: 500,
-    height: 500,
+    absoluteWidth: 500,
+    absoluteHeight: 500,
+    width: 0,
+    height: 0,
     backgroundColor: 'black',
 }
 
@@ -27,11 +30,11 @@ export function createCanvasController(canvas, props) {
         if(!props) {
             return Logger.warn('Unable to draw null item');
         }
-        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = false, alpha = 1} = props;
-        const origX = x;
-        const origY = y;
+        let { x, y, radius, fill = 'black', stroke, strokeWidth, marker = false, alpha = 1 } = props;
+        x *= _state.scale;
+        y *= _state.scale;
+        radius *= _state.scale;
         
-        scale();
         _ctx.globalAlpha = alpha;
         _ctx.beginPath();
         _ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
@@ -48,11 +51,8 @@ export function createCanvasController(canvas, props) {
         }
 
         _ctx.globalAlpha = 1;
-        resetScale();
-
         if(marker) {
-            _ctx.fillStyle = 'red';
-            _ctx.fillRect(origX * _state.scale - 1, origY * _state.scale - 1, 3, 3);
+            drawCircle({ x, y, radius: 1, fill: 'red' });
         }
     }
 
@@ -61,22 +61,15 @@ export function createCanvasController(canvas, props) {
             return warn('Unable to draw null item');
         }
         let { x, y, width, height, fill = 'black', alpha = 1 } = props;
-        scale();
+        x *= _state.scale;
+        y *= _state.scale;
+        width *= _state.scale;
+        height *= _state.scale;
         _ctx.globalAlpha = alpha;
 
         _ctx.fillStyle = fill;
         _ctx.fillRect(x, y, width, height);
-
         _ctx.globalAlpha = 1;
-        resetScale();
-    }
-
-    function scale() {
-        _ctx.setTransform(_state.scale, 0, 0, _state.scale, 0, 0);
-    }
-
-    function resetScale() {
-        _ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     function clear() {
@@ -90,9 +83,37 @@ export function createCanvasController(canvas, props) {
     }
 
     function refresh() {
-        canvas.width = _state.width * _state.scale;
-        canvas.height = _state.height * _state.scale;
-        clear();
+        if(props.fitToParent) {
+            const parent = El.parent(canvas);
+            let { width, height } = El.bounds(parent);
+            width -= parent.clientLeft * 2;
+            height -= parent.clientTop * 2;
+            _state.width = width / _state.scale;
+            _state.height = height / _state.scale;
+            canvas.width = _state.absoluteWidth = width;
+            canvas.height = _state.absoluteHeight = height;
+        } else {
+            _state.width = _state.absoluteWidth / _state.scale;
+            _state.height = _state.absoluteHeight / _state.scale;
+            canvas.width = _state.absoluteWidth;
+            canvas.height = _state.absoluteHeight;
+        }
+
+        El.css(canvas, {
+            width: _state.absoluteWidth + 'px',
+            height: _state.absoluteHeight + 'px',
+        });
+    }
+
+    function setSize({ width, height }) {
+        _state.width = width;
+        _state.height = height;
+        refresh();
+    }
+
+    if(props.fitToParent) {
+        const parent = El.parent(canvas);
+        ResizeObserver
     }
 
     refresh();
@@ -102,6 +123,7 @@ export function createCanvasController(canvas, props) {
         drawCircle,
         drawRect,
         refresh,
+        setSize,
         clear
     }
 }

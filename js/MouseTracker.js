@@ -1,8 +1,9 @@
+import El from './El.js';
 import Events from './Events.js'
 import Logger from './Logger.js';
 import VectorUtil from './VectorUtil.js';
 
-export function createMouseTracker({ el, scale = 1, onClick }) {
+export function createMouseTracker({ el, scale = 1, onClick, parent = document }) {
     const _state = {
         absolutePosition: VectorUtil.create(),
         position: VectorUtil.create(), // relative position
@@ -12,7 +13,7 @@ export function createMouseTracker({ el, scale = 1, onClick }) {
     }
     
     // event listeners
-    const documentListeners = {
+    const listeners = {
         [Events.MOUSE_MOVE]: (event) => {
             _state.absolutePosition.x = event.pageX;
             _state.absolutePosition.y = event.pageY;
@@ -36,17 +37,16 @@ export function createMouseTracker({ el, scale = 1, onClick }) {
             event.preventDefault();
         },
     }
+    const events = [Events.MOUSE_MOVE, Events.MOUSE_DOWN, Events.MOUSE_UP, Events.CONTEXT_MENU];
     
     function addEventListeners() {
-        Logger.log('Adding listeners to document', el);
-        const documentEvents = [Events.MOUSE_MOVE, Events.MOUSE_DOWN, Events.MOUSE_UP, Events.CONTEXT_MENU];
-        documentEvents.forEach((event) => document.addEventListener(event, documentListeners[event]));
+        Logger.log('Adding listeners to parent', parent);
+        events.forEach((event) => El.on(parent, event, listeners[event]));
     }
 
     function removeEventListeners() {
-        Logger.log('Removing listeners listeners from document', el);
-        const documentEvents = [Events.MOUSE_MOVE, Events.MOUSE_DOWN, Events.MOUSE_UP];
-        documentEvents.forEach((event) => document.removeEventListener(event, documentListeners[event]));
+        Logger.log('Removing listeners listeners from parent', parent);
+        events.forEach((event) => El.off(parent, event, listeners[event]));
     }
 
     function updateRelativePosition() {

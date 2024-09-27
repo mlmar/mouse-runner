@@ -8,9 +8,9 @@ export function random(min, max, floor) {
 
 export const COLORS = [
     'crimson', 
-    'lightseagreen', 
+    'green', 
     'orange',
-    'cornflowerblue',
+    'lightseagreen',
     'purple',
     'antiquewhite',
     'darkblue'
