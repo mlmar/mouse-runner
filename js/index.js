@@ -2,6 +2,7 @@ import Logger from './Logger.js';
 import El from './El.js';
 import { createGameController } from './GameController.js';
 import { createLoopController } from './LoopController.js';
+import { createScoreTracker } from './ScoreTracker.js';
 import Events from './Events.js';
 
 window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
@@ -9,18 +10,23 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     const appElement = El.find('#app');
     const canvasElement = El.find('#canvas-main');
     const scoreElement = El.find('#label-score');
+    const highScoreElement = El.find('#label-high-score');
     const menuElement = El.find('#menu');
 
+    const scoreTracker = createScoreTracker('orb_game');
     const gameController = createGameController({ canvas: canvasElement });
     const gameLoop = createLoopController((state) => {
         gameController.update(state.tickSpeed);
 
         const { inProgress, score, targetColor } = gameController.get();
+        scoreTracker.set(score);
         El.css(appElement, { border: `.8em solid ${targetColor}` });
         El.css(scoreElement, { color: targetColor });
-
+        El.css(highScoreElement, { color: targetColor });
+        El.text(El.findChild(scoreElement, 'span'), score);
+        
         if(!inProgress) {
-            El.findChild(scoreElement, 'span').innerText = score;
+            El.text(El.findChild(highScoreElement, 'span'), scoreTracker.get().highScore);
             El.css(menuElement, { color: targetColor });
             stopGame();
         }
@@ -40,7 +46,7 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
 
     function toggleMenu(show) {
         toggleVisible(menuElement, show);
-        // toggleVisible(scoreElement, show);
+        toggleVisible(highScoreElement, show);
         if(show) {
             El.css(canvasElement, { cursor: '' });
             El.on(document, Events.MOUSE_DOWN, startGame);

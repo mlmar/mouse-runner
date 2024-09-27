@@ -18,6 +18,10 @@ function bounds(el) {
     return el.getBoundingClientRect();
 }
 
+function text(el, val) {
+    el.innerText = val;
+}
+
 function css(el, props) {
     for(let prop in props) {
         el.style[prop] = props[prop];
@@ -49,6 +53,7 @@ export default {
     findChild,
     parent,
     bounds,
+    text,
     css,
     visible,
     on,

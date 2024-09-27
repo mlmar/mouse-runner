@@ -1,5 +1,6 @@
 import El from './El.js';
 import Logger from './Logger.js';
+import Events from './Events.js';
 
 const DEFAULT_STATE = {
     scale: 1,
@@ -112,8 +113,9 @@ export function createCanvasController(canvas, props) {
     }
 
     if(props.fitToParent) {
-        const parent = El.parent(canvas);
-        ResizeObserver
+        El.on(window, Events.RESIZE, () => {
+            refresh();
+        });
     }
 
     refresh();
