@@ -3,7 +3,7 @@ function find(query) {
 }
 
 function findAll(query) {
-    return document.querySelector(query);
+    return document.querySelectorAll(query);
 }
 
 function findChild(el, query) {
@@ -47,6 +47,15 @@ function off(el, event, func) {
     el.removeEventListener(event, func);
 }
 
+function disable(el, disabled = true) {
+    el.disabled = disabled;
+    toggleClass(el, 'disabled', disabled);
+}
+
+function toggleClass(el, className, isToggled) {
+    el.classList.toggle(className, isToggled)
+}
+
 export default {
     find,
     findAll,
@@ -57,5 +66,7 @@ export default {
     css,
     visible,
     on,
-    off
+    off,
+    disable,
+    toggleClass,
 }

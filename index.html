@@ -13,13 +13,25 @@
         <script src="js/index.js" type="module"></script>
     </head>
     <body class="flex">
-        <main id="app" class="flex flex-fill">
-            <label id="label-score" class="flex flex-fit"> SCORE:&nbsp; <span> 0 </span> </label>
-            <label id="label-high-score" class="flex flex-fit"> HIGH SCORE:&nbsp; <span> 0 </span> </label>
+        <main id="app" class="flex flex-fill border-color">
+            <label id="label-score" class="flex flex-fit color"> SCORE:&nbsp; <span> 0 </span> </label>
+            <label id="label-high-score" class="flex flex-fit color"> <button id="button-share" class="color floaty"> LEADERBOARD &#10148; </button> HIGH SCORE:&nbsp; <span> 0 </span> </label>
             <canvas id="canvas-main"></canvas>
-            <section id="menu">
-                <label> CLICK ANYWHERE TO PLAY </label>
-            </section>
+            <label id="label-start" class="color floaty">  CLICK ANYWHERE TO PLAY </label>
         </main>
+        <article id="leaderboard" class="flex-col border-color" style="display: none">
+            <section id="scores-header" class="score-row">
+                <label class="color border-color"> # </label>
+                <label class="color border-color"> PLAYER </label>
+                <label class="color border-color"> SCORE </label>
+            </section>
+            <section id="scores" class="flex-col flex-fill">
+            </section>
+            <section class="flex flex-middle flex-center">
+                <input id="input-name" class="flex border-color" type="text" placeholder="INITIALS" autocomplete="off">
+                <input id="input-color" class="flex" type="color" placeholder="INITIALS">
+                <button id="button-submit" class="flex color"> SUBMIT </button>
+            </section>
+        </article>
     </body>
 </html>

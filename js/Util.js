@@ -20,3 +20,9 @@ export function getRandomColor() {
     const i = random(0, COLORS.length, true);
     return COLORS[i];
 }
+
+const ctx = document.createElement('canvas').getContext('2d');
+export function standardizeColor(color){
+    ctx.fillStyle = color;
+    return ctx.fillStyle;
+}

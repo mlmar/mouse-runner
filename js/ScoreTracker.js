@@ -1,8 +1,6 @@
-export function createScoreTracker(key) {
-    if(!key) {
-        throw new Error('Local storage key required for score tracker');
-    }
+import LocalStorageKeys from './LocalStorageKeys.js';
 
+export function createScoreTracker() {
     const _state = {
         score: 0,
         highScore: 0
@@ -31,11 +29,11 @@ export function createScoreTracker(key) {
     }
 
     function refreshHighScore() {
-        const score = localStorage.getItem(key);
+        const score = localStorage.getItem(LocalStorageKeys.ORB_SCORE_KEY);
         if(score !== null) {
             _state.highScore = score;
         }
-        localStorage.setItem(key, Math.max(_state.score, _state.highScore));
+        localStorage.setItem(LocalStorageKeys.ORB_SCORE_KEY, Math.max(_state.score, _state.highScore));
     }
 
     refreshHighScore();

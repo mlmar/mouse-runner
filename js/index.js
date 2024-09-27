@@ -3,37 +3,53 @@ import El from './El.js';
 import { createGameController } from './GameController.js';
 import { createLoopController } from './LoopController.js';
 import { createScoreTracker } from './ScoreTracker.js';
+import { createLeaderboard } from './Leaderboard.js';
 import Events from './Events.js';
 
 window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     Logger.log('DOM fully loaded and parsed');
-    const appElement = El.find('#app');
     const canvasElement = El.find('#canvas-main');
     const scoreElement = El.find('#label-score');
     const highScoreElement = El.find('#label-high-score');
-    const menuElement = El.find('#menu');
+    const shareElement = El.find("#button-share");
+    const startElement = El.find('#label-start');
 
-    const scoreTracker = createScoreTracker('orb_game');
+    const leaderboardElement = El.find('#leaderboard');
+    const leaderboard = createLeaderboard(leaderboardElement);
+    El.on(leaderboardElement, Events.MOUSE_DOWN, event => event.stopPropagation());
+
+    const elementsToColor = El.findAll('.color');
+    const bordersToColor = El.findAll('.border-color');
+    function colorElements(color) {
+        elementsToColor.forEach(el => El.css(el, { color }))
+        bordersToColor.forEach(el => El.css(el, { borderColor: color }));
+    }
+    colorElements('white');
+    
+    const scoreTracker = createScoreTracker();
+    El.text(El.findChild(highScoreElement, 'span'), scoreTracker.get().highScore);
+    El.on(shareElement, Events.MOUSE_DOWN, handleOpenLeaderboard);
+
     const gameController = createGameController({ canvas: canvasElement });
     const gameLoop = createLoopController((state) => {
         gameController.update(state.tickSpeed);
 
         const { inProgress, score, targetColor } = gameController.get();
         scoreTracker.set(score);
-        El.css(appElement, { border: `.8em solid ${targetColor}` });
+        colorElements(targetColor);
         El.css(scoreElement, { color: targetColor });
-        El.css(highScoreElement, { color: targetColor });
         El.text(El.findChild(scoreElement, 'span'), score);
         
         if(!inProgress) {
             El.text(El.findChild(highScoreElement, 'span'), scoreTracker.get().highScore);
-            El.css(menuElement, { color: targetColor });
+            El.css(startElement, { color: targetColor });
             stopGame();
         }
     });
 
     function startGame() {
-        setTimeout(() => toggleMenu(false), 10);
+        setTimeout(() => toggleOverlay(false), 10);
+        El.visible(leaderboardElement, false)
         gameController.start();
         gameLoop.start();
     }
@@ -41,12 +57,14 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     function stopGame() {
         gameController.stop();
         gameLoop.stop();
-        setTimeout(() => toggleMenu(true), 10);
+        setTimeout(() => toggleOverlay(true), 10);
     }
 
-    function toggleMenu(show) {
-        toggleVisible(menuElement, show);
-        toggleVisible(highScoreElement, show);
+    toggleOverlay(true);
+    function toggleOverlay(show) {
+        El.visible(startElement, show);
+        El.visible(highScoreElement, show);
+        El.visible(shareElement, scoreTracker.get().highScore > 0);
         if(show) {
             El.css(canvasElement, { cursor: '' });
             El.on(document, Events.MOUSE_DOWN, startGame);
@@ -55,9 +73,10 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
             El.off(document, Events.MOUSE_DOWN, startGame);
         }
     }
-    toggleMenu(true);
-});
 
-function toggleVisible(el, show) {
-    el.style.display = show ? '' : 'none';
-}
+    function handleOpenLeaderboard(event) {
+        event.stopPropagation();
+        El.visible(leaderboardElement, true);
+        leaderboard.refresh();
+    }
+});
