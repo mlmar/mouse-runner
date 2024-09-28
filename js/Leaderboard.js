@@ -81,7 +81,7 @@ export function createLeaderboard(el) {
         const parent = El.parent(submitElement);
 
         const currentScore = localStorage.getItem(LocalStorageKeys.ORB_SCORE_KEY) ?? 0;
-        El.visible(parent, currentScore > _state.submittedScore);
+        // El.visible(parent, currentScore > _state.submittedScore);
     }
     
     function refresh() {
