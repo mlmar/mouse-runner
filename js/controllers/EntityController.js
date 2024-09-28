@@ -1,9 +1,10 @@
-import Logger from './Logger.js';
-import { random } from './Util.js';
-import VectorUtil from './VectorUtil.js';
+import Logger from '../util/Logger.js';
+import CommonUtil from '../util/CommonUtil.js';
+import VectorUtil from '../util/VectorUtil.js';
 
 export function createEntityController() {
     let _entities = [];
+    let _entitiesToRemove = [];
 
     function create(props = {}) {
         return {
@@ -55,6 +56,17 @@ export function createEntityController() {
         _entities.splice(0, _entities.length);
     }
 
+    function queueRemove(entity) {
+        _entitiesToRemove.push(entity);
+    }
+
+    function cleanup() {
+        if(_entitiesToRemove.length) {
+            remove(_entitiesToRemove);
+            _entitiesToRemove.splice(0, _entitiesToRemove.length);
+        }
+    }
+
     function updateEntityPosition(entity, tickSpeed) {
         const adjustedVelocity = VectorUtil.scale(entity.velocity, tickSpeed);
         entity.position = VectorUtil.add(entity.position, adjustedVelocity);
@@ -86,7 +98,7 @@ export function createEntityController() {
 
     function getRandom(includeInactive) {
         const activeEntities = includeInactive ? getAll() : getActive();
-        const index = random(0, activeEntities.length, true);
+        const index = CommonUtil.random(0, activeEntities.length, true);
         return activeEntities[index];
     }
 
@@ -95,6 +107,8 @@ export function createEntityController() {
         add,
         remove,
         removeAll,
+        queueRemove,
+        cleanup,
         getAll,
         getActive,
         getRandom,

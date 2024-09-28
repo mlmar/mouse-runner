@@ -1,10 +1,10 @@
-import Logger from './Logger.js';
-import El from './El.js';
-import { createGameController } from './GameController.js';
-import { createLoopController } from './LoopController.js';
-import { createScoreTracker } from './ScoreTracker.js';
-import { createLeaderboard } from './Leaderboard.js';
-import Events from './Events.js';
+import Logger from './util/Logger.js';
+import El from './util/El.js';
+import { createGameController } from './controllers/GameController.js';
+import { createLoopController } from './controllers/LoopController.js';
+import { createScoreTracker } from './controllers/ScoreTracker.js';
+import { createLeaderboard } from './components/Leaderboard.js';
+import Events from './globals/Events.js';
 
 window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     Logger.log('DOM fully loaded and parsed');
@@ -32,17 +32,17 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
 
     const gameController = createGameController({ canvas: canvasElement });
     const gameLoop = createLoopController((state) => {
-        gameController.update(state.tickSpeed);
+        gameController.update(state);
 
-        const { inProgress, score, targetColor } = gameController.get();
+        const { inProgress, score, borderColor } = gameController.get();
         scoreTracker.set(score);
-        colorElements(targetColor);
-        El.css(scoreElement, { color: targetColor });
+        colorElements(borderColor);
+        El.css(scoreElement, { color: borderColor });
         El.text(El.findChild(scoreElement, 'span'), score);
         
         if(!inProgress) {
             El.text(El.findChild(highScoreElement, 'span'), scoreTracker.get().highScore);
-            El.css(startElement, { color: targetColor });
+            El.css(startElement, { color: borderColor });
             stopGame();
         }
     });

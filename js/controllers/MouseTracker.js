@@ -1,7 +1,7 @@
-import El from './El.js';
-import Events from './Events.js'
-import Logger from './Logger.js';
-import VectorUtil from './VectorUtil.js';
+import El from '../util/El.js';
+import Events from '../globals/Events.js'
+import Logger from '../util/Logger.js';
+import VectorUtil from '../util/VectorUtil.js';
 
 export function createMouseTracker({ el, scale = 1, onClick, parent = document }) {
     const _state = {

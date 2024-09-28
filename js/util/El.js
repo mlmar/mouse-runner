@@ -40,6 +40,7 @@ function visible(el, show = null){
 }
 
 function on(el, event, func) {
+    off(el, event, func);
     el.addEventListener(event, func);
 }
 

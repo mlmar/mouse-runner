@@ -1,6 +1,6 @@
-import El from './El.js';
-import Logger from './Logger.js';
-import Events from './Events.js';
+import El from '../util/El.js';
+import Logger from '../util/Logger.js';
+import Events from '../globals/Events.js';
 
 const DEFAULT_STATE = {
     scale: 1,

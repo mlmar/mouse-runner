@@ -1,4 +1,4 @@
-import  Logger from './Logger.js';
+import  Logger from '../util/Logger.js';
 
 const DEFAULT_STATE = {
     id: null,

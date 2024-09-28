@@ -1,4 +1,4 @@
-import LocalStorageKeys from './LocalStorageKeys.js';
+import LocalStorageKeys from '../util/LocalStorageKeys.js';
 
 export function createScoreTracker() {
     const _state = {
