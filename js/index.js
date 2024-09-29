@@ -13,6 +13,8 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     const highScoreElement = El.find('#label-high-score');
     const shareElement = El.find("#button-share");
     const startElement = El.find('#label-start');
+    const creditsElement = El.find('#credits');
+    El.on(creditsElement, event => event.stopPropagation())
 
     const leaderboardElement = El.find('#leaderboard');
     const leaderboard = createLeaderboard(leaderboardElement);
@@ -20,9 +22,11 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
 
     const elementsToColor = El.findAll('.color');
     const bordersToColor = El.findAll('.border-color');
+    const backgroundsToColor = El.findAll('.background-color');
     function colorElements(color) {
         elementsToColor.forEach(el => El.css(el, { color }))
         bordersToColor.forEach(el => El.css(el, { borderColor: color }));
+        backgroundsToColor.forEach(el => El.css(el, { backgroundColor: color }));
     }
     colorElements('white');
     
@@ -65,6 +69,7 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
         El.visible(startElement, show);
         El.visible(highScoreElement, show);
         El.visible(shareElement, show);
+        El.visible(creditsElement, show);
         if(show) {
             El.css(canvasElement, { cursor: '' });
             El.on(document, Events.MOUSE_DOWN, startGame);
