@@ -125,7 +125,8 @@ export function createGameController({ canvas }) {
     }
 
     function getColorEntitySpeed() {
-        return _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * _state.entitySpeedMutliplier * (_state.score)
+        // return _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * Math.pow(_state.entitySpeedMutliplier * (_state.score + 1), 2); // parabola
+        return _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * _state.entitySpeedMutliplier * (_state.score); // linear
     }
 
     function createBonusEntities(limit) {
@@ -210,6 +211,15 @@ export function createGameController({ canvas }) {
         const { position } = mouseTracker.get();
         _mouseEntity.position.x = position.x;
         _mouseEntity.position.y = position.y;
+
+        if(_state.lives > 1) {
+            _mouseEntity.color = 'deeppink';
+            _mouseEntity.stroke = 'white';
+        } else {
+            _mouseEntity.color = 'red';
+            _mouseEntity.stroke = null;
+        }
+
         colorEntityController.updateEntityPosition(_mouseEntity);
         updateColorEntityEdgeCollision(_mouseEntity);
     }
@@ -461,7 +471,7 @@ export function createGameController({ canvas }) {
                 fill: entity.color,
                 radius: entity.radius,
                 stroke: entity.stroke,
-                strokeWidth: 0,
+                strokeWidth: entity.stroke ? 5 : 0,
                 ...entity.position
             });
         }
