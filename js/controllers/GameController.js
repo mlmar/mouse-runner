@@ -30,7 +30,7 @@ const ENTITY_RADIUS = 1.4;
 
 const BONUS_ENTITY_RADIUS = .8;
 const BONUS_ENTITY_FREQUENCY = 5;
-const BONUS_ENTITY_START_SCORE = 5;
+const BONUS_ENTITY_START_SCORE = 20;
 
 const DEFAULT_STATE = {
     inProgress: false,
