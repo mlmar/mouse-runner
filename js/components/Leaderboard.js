@@ -8,6 +8,7 @@ import { getScores, insertScore } from '../service/ScoresService.js';
 export function createLeaderboard(el) {
 
     const scoresElement = El.findChild(el, '#scores');
+    const scoresHeaderElement = El.findChild(el, '#scores-header');
     const nameElement = El.findChild(el, '#input-name');
     const colorElement = El.findChild(el, '#input-color');
     const submitElement = El.findChild(el, '#button-submit');
@@ -96,6 +97,11 @@ export function createLeaderboard(el) {
 
     function refreshBorderColor() {
         El.css(el, { borderColor: _state.color });
+        const labels = El.findChildren(scoresHeaderElement, 'label');
+        labels.forEach(label => El.css(label, {
+            borderColor: _state.color,
+            color: _state.color
+        }));
     }
     
     function refresh() {

@@ -10,6 +10,10 @@ function findChild(el, query) {
     return el.querySelector(query);
 }
 
+function findChildren(el, query) {
+    return el.querySelectorAll(query);
+}
+
 function parent(el) {
     return el.parentNode;
 }
@@ -61,6 +65,7 @@ export default {
     find,
     findAll,
     findChild,
+    findChildren,
     parent,
     bounds,
     text,
