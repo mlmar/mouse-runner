@@ -30,7 +30,7 @@ const ENTITY_RADIUS = 1.4;
 
 const BONUS_ENTITY_RADIUS = .8;
 const BONUS_ENTITY_FREQUENCY = 5;
-const BONUS_ENTITY_START_SCORE = 20;
+const BONUS_ENTITY_START_SCORE = 5;
 
 const DEFAULT_STATE = {
     inProgress: false,
@@ -42,7 +42,9 @@ const DEFAULT_STATE = {
         isActive: false,
         startTime: 0,
         uses: 0,
-        maxUses: 2
+        maxUses: 2,
+        startTime: 0,
+        maxTime: 3000
     },
     tickSpeed: 0,
     time: 0
@@ -171,7 +173,7 @@ export function createGameController({ canvas }) {
         entities.forEach((entity) => {
             const hasHistory = _mouseEntity.history.length > _mouseEntity.historyLength / 2;
             if(hasHistory && colorEntityController.hasCollided(_mouseEntity, entity)) { // if mouse entity collides with this entity
-                const isBonusClick = _state.bonus.isActive && _state.bonus.uses < _state.bonus.maxUses;
+                const isBonusClick = _state.bonus.isActive && getElapsedBonusTime() < _state.bonus.maxTime;
                 if(isBonusClick || _state.targetColor === entity.color) {
                     entity.active = false;
                     _mouseEntity.history = []; // clear history
@@ -234,7 +236,7 @@ export function createGameController({ canvas }) {
     }
 
     function updateBonusEntities() {
-        if(_state.bonus.isActive && _state.bonus.uses >= _state.bonus.maxUses) {
+        if(_state.bonus.isActive && getElapsedBonusTime() > _state.bonus.maxTime) {
             _state.bonus.isActive = false;
         }
 
@@ -348,18 +350,6 @@ export function createGameController({ canvas }) {
         }
     }
 
-    function getRandomPosition(radius) {
-        const { width, height } = canvasController.get();
-        return {
-            x: CommonUtil.random(radius, width - radius),
-            y: CommonUtil.random(radius, height - radius)
-        }
-    }
-
-    function getElapsedBonusTime() {
-        return Math.floor(_state.time / 1000) - Math.floor(_state.bonus.startTime / 1000);
-    }
-
     function renderMouseEntity(entity) {
         if(entity.active) {
             if(_state.bonus.isActive) {
@@ -387,7 +377,7 @@ export function createGameController({ canvas }) {
             canvasController.drawCircle({
                 fill: CommonUtil.randomColor(),
                 radius: scalar / frequencyLength * entity.radius,
-                alpha: 1 - _state.bonus.uses / _state.bonus.maxUses,
+                alpha: 1 - getElapsedBonusTime() / _state.bonus.maxTime,
                 x: x + CommonUtil.random(-entity.speed, entity.speed),
                 y: y + CommonUtil.random(-entity.speed, entity.speed)
             });
@@ -439,14 +429,14 @@ export function createGameController({ canvas }) {
     }
 
     function renderBonusEntityTrail(entity) {
-        const startingIndex = entity.historyLength - entity.historyLength / 5;
+        const startingIndex = entity.historyLength - entity.historyLength / 2;
         const trailLength = entity.history.length - startingIndex;
-        for(let i = startingIndex; i < entity.history.length; i++) {
+        for(let i = startingIndex; i < entity.history.length; i += 4) {
             const { x, y } = entity.history[i];
             canvasController.drawCircle({
                 fill: CommonUtil.randomColor(),
                 radius: (i - startingIndex) / trailLength * entity.radius,
-                alpha: .5,
+                alpha: .8,
                 x: x + CommonUtil.random(-.2, .2),
                 y: y + CommonUtil.random(-.2, .2)
             });
@@ -463,6 +453,18 @@ export function createGameController({ canvas }) {
         renderBackground();
         updateEntities();
         _state.borderColor = _state.targetColor;
+    }
+
+    function getRandomPosition(radius) {
+        const { width, height } = canvasController.get();
+        return {
+            x: CommonUtil.random(radius, width - radius),
+            y: CommonUtil.random(radius, height - radius)
+        }
+    }
+
+    function getElapsedBonusTime() {
+        return _state.time - _state.bonus.startTime;
     }
 
     return {
