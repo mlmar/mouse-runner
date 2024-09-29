@@ -1,5 +1,5 @@
 * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -59,6 +59,14 @@ button:focus, input:focus {
     justify-content: space-between;
 }
 
+.flex.flex-end {
+    justify-content: flex-end;
+}
+
+.flex-col.flex-end {
+    align-items: flex-end;
+}
+
 /* app */
 body {
     background: black;
@@ -73,6 +81,7 @@ body {
 }
 
 #label-score,
+#label-lives,
 #label-high-score {
     position: absolute;
     top: 0;
@@ -81,8 +90,11 @@ body {
     font-size: 2.5em;
     padding: 1em;
     transition: color .5s ease;
+    cursor: none;
+    line-height: 1em;
 }
 
+#label-lives,
 #label-high-score {
     right: 0;
 }
@@ -141,10 +153,25 @@ body {
     left: 50%;
     transform: translate(-50%);
     height: 70%;
-    width: 30em;
-    background: black;
+    width: 35em;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(1em);
     border: .5em solid white;
     padding-bottom: 1em;
+}
+
+#leaderboard #button-close {
+    width: 1em;
+    height: 1em;
+    font-size: 3em;
+    font-weight: 900;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+}
+
+#leaderboard #button-close > span {
+    margin-top: -.1em;
 }
 
 #leaderboard > label:first-child {

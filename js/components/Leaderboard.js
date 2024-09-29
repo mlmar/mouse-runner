@@ -12,6 +12,7 @@ export function createLeaderboard(el) {
     const nameElement = El.findChild(el, '#input-name');
     const colorElement = El.findChild(el, '#input-color');
     const submitElement = El.findChild(el, '#button-submit');
+    const closeElement = El.findChild(el, '#button-close')
 
     const _state = {
         name: localStorage.getItem(LocalStorageKeys.ORB_NAME_KEY) ?? '',
@@ -44,7 +45,7 @@ export function createLeaderboard(el) {
         localStorage.setItem(LocalStorageKeys.ORB_COLOR_KEY, _state.color);
         refreshName();
         refreshSubmitButton();
-        refreshBorderColor();
+        refreshLeaderboardColor();
     }
 
     function stripName(name) {
@@ -95,13 +96,17 @@ export function createLeaderboard(el) {
         // El.visible(parent, currentScore > _state.submittedScore);
     }
 
-    function refreshBorderColor() {
+    function refreshLeaderboardColor() {
         El.css(el, { borderColor: _state.color });
         const labels = El.findChildren(scoresHeaderElement, 'label');
         labels.forEach(label => El.css(label, {
             borderColor: _state.color,
             color: _state.color
         }));
+
+        El.css(closeElement, {
+            color: _state.color
+        });
     }
     
     function refresh() {
@@ -118,7 +123,7 @@ export function createLeaderboard(el) {
 
         if(El.visible(el)) {
             refreshScores();
-            refreshBorderColor();
+            refreshLeaderboardColor();
         }
     }
 

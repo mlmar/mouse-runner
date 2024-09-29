@@ -12,7 +12,7 @@ const CANVAS_PROPS = {
     fitToParent: true
 }
 
-const BACKGROUND = {
+const CANVAS_BACKGROUND = {
     x: 0,
     y: 0,
     width: CANVAS_PROPS.absoluteWidth,
@@ -32,22 +32,27 @@ const BONUS_ENTITY_RADIUS = .8;
 const BONUS_ENTITY_FREQUENCY = 5;
 const BONUS_ENTITY_START_SCORE = 20;
 
+const BONUS_TYPES = {
+    WILDCARD: 'WILDCARD',
+    LIFE: 'LIFE',
+    SLOW: 'SLOW'
+}
+
 const DEFAULT_STATE = {
     inProgress: false,
+    tickSpeed: 0,
+    time: 0,
     targetColor: null,
     borderColor: null,
     score: 0,
+    entitySpeedMutliplier: ENTITY_SPEED_MULTIPLIER,
+    lives: 1,
     bonus: {
         isSpawned: false,
         isActive: false,
         startTime: 0,
-        uses: 0,
-        maxUses: 2,
-        startTime: 0,
-        maxTime: 3000
     },
-    tickSpeed: 0,
-    time: 0
+
 }
 
 export function createGameController({ canvas }) {
@@ -86,8 +91,11 @@ export function createGameController({ canvas }) {
     }
 
     function stop() {
-        _state.inProgress = false;
-        _state.targetColor = 'red';
+        _state.lives--;
+        if(_state.lives === 0) {
+            _state.inProgress = false;
+            _state.targetColor = 'red';
+        }
     }
 
     function refreshTargetColor() {
@@ -99,7 +107,7 @@ export function createGameController({ canvas }) {
         const entities = colorEntityController.getActive().slice(0);
         for(let i = 0; i < limit; i++) {
             const randomExistingEntity = entities[CommonUtil.random(0, entities.length, true)];
-            const speed = ENTITY_SPEED_MULTIPLIER + ENTITY_SPEED_MULTIPLIER * Math.pow(ENTITY_SPEED_MULTIPLIER * (_state.score + 1), 2);
+            const speed = _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * Math.pow(_state.entitySpeedMutliplier * (_state.score + 1), 2);
             const entity = colorEntityController.create({ 
                 radius: ENTITY_RADIUS, 
                 speed: speed, 
@@ -121,21 +129,69 @@ export function createGameController({ canvas }) {
         const entities = colorEntityController.getActive().slice(0);
         for(let i = 0; i < limit; i++) {
             const randomExistingEntity = entities[CommonUtil.random(0, entities.length, true)];
-            const speed = 2 * ENTITY_SPEED_MULTIPLIER;
-            const entity = colorEntityController.create({ 
-                radius: BONUS_ENTITY_RADIUS, 
-                speed: speed, 
-                color: 'white',
-                stroke: 'gold', 
-                active: true,
-                position: randomExistingEntity ? VectorUtil.create(randomExistingEntity.position) : getRandomPosition(ENTITY_RADIUS),
-                velocity: VectorUtil.random(speed),
-                data: {
-                    type: ENTITY_TYPES.BONUS,
-                    spawnTime: _state.time
+            const bonusTypes = Object.values(BONUS_TYPES);
+            const randomBonusType = bonusTypes[CommonUtil.random(0, bonusTypes.length, true)];
+
+            let entity = null;
+            switch(randomBonusType) {
+                case BONUS_TYPES.WILDCARD: {
+                    const speed = 2 * ENTITY_SPEED_MULTIPLIER;
+                    entity = colorEntityController.create({ 
+                        radius: BONUS_ENTITY_RADIUS, 
+                        speed: speed, 
+                        color: 'white',
+                        stroke: 'gold', 
+                        active: true,
+                        position: randomExistingEntity ? VectorUtil.create(randomExistingEntity.position) : getRandomPosition(ENTITY_RADIUS),
+                        velocity: VectorUtil.random(speed),
+                        data: {
+                            type: ENTITY_TYPES.BONUS,
+                            bonusType: BONUS_TYPES.WILDCARD,
+                            spawnTime: _state.time
+                        }
+                    });
+                    break;
                 }
-            });
-            bonusEntityController.add(entity);
+                case BONUS_TYPES.LIFE: {
+                    const speed = ENTITY_SPEED_MULTIPLIER;
+                    entity = colorEntityController.create({ 
+                        radius: BONUS_ENTITY_RADIUS * .6, 
+                        speed: speed / 2, 
+                        color: 'deeppink',
+                        stroke: 'white', 
+                        active: true,
+                        position: randomExistingEntity ? VectorUtil.create(randomExistingEntity.position) : getRandomPosition(ENTITY_RADIUS),
+                        velocity: VectorUtil.random(speed),
+                        data: {
+                            type: ENTITY_TYPES.BONUS,
+                            bonusType: BONUS_TYPES.LIFE,
+                            spawnTime: _state.time
+                        }
+                    });
+                    break;
+                }
+                case BONUS_TYPES.SLOW: {
+                    const speed = ENTITY_SPEED_MULTIPLIER;
+                    entity = colorEntityController.create({ 
+                        radius: BONUS_ENTITY_RADIUS * .6, 
+                        speed: speed * 1.5, 
+                        color: 'deepslate',
+                        stroke: 'white', 
+                        active: true,
+                        position: randomExistingEntity ? VectorUtil.create(randomExistingEntity.position) : getRandomPosition(ENTITY_RADIUS),
+                        velocity: VectorUtil.random(speed),
+                        data: {
+                            type: ENTITY_TYPES.BONUS,
+                            bonusType: BONUS_TYPES.SLOW,
+                            spawnTime: _state.time
+                        }
+                    });
+                    break;
+                }
+            }
+            if(entity) {
+                bonusEntityController.add(entity);
+            }
         }
     }
 
@@ -173,7 +229,7 @@ export function createGameController({ canvas }) {
         entities.forEach((entity) => {
             const hasHistory = _mouseEntity.history.length > _mouseEntity.historyLength / 2;
             if(hasHistory && colorEntityController.hasCollided(_mouseEntity, entity)) { // if mouse entity collides with this entity
-                const isBonusClick = _state.bonus.isActive && getElapsedBonusTime() < _state.bonus.maxTime;
+                const isBonusClick = isBonusActive();
                 if(isBonusClick || _state.targetColor === entity.color) {
                     entity.active = false;
                     _mouseEntity.history = []; // clear history
@@ -185,11 +241,9 @@ export function createGameController({ canvas }) {
                     }
                     refreshTargetColor();
                     _state.score++;
-
-                    if(isBonusClick) {
-                        _state.bonus.uses++;
-                    }
                 } else {
+                    entity.active = false;
+                    colorEntityController.queueRemove(entity);
                     entity.color = 'red';
                     stop();
                 }
@@ -205,9 +259,7 @@ export function createGameController({ canvas }) {
         entities.forEach((entity) => {
             if(bonusEntityController.hasCollided(_mouseEntity, entity)) { // if mouse entity collides with this bonuse entity
                 bonusEntityController.remove(entity);
-                _state.bonus.isActive = true;
-                _state.bonus.startTime = _state.time;
-                _state.bonus.uses = 0;
+                setBonus(entity.data.bonusType)
                 isSuccessfulClick = true;
             }
         });
@@ -224,40 +276,20 @@ export function createGameController({ canvas }) {
                     updateColorEntityEdgeCollision(entity);
                     if(_mouseEntity.active && !_state.bonus.isActive) {
                         const hasHistory = _mouseEntity.history.length > _mouseEntity.historyLength / 2;
-                        if(hasHistory && colorEntityController.hasCollided(_mouseEntity, entity) && _state.targetColor !== entity.color) { // if mouse entity collides with this entity
+                        const isSameColor = _state.targetColor === entity.color;
+
+                        // if mouse entity collides with an older color entity of a different color, then penalize the player
+                        if(hasHistory && !isSameColor && colorEntityController.hasCollided(_mouseEntity, entity)) { 
+                            entity.active = false;
                             entity.color = 'red';
+                            entity.speed = .1;
+                            colorEntityController.queueRemove(entity)
                             stop();
                         }
                     }
                 }
                 renderColorEntity(entity);
             }
-        });
-    }
-
-    function updateBonusEntities() {
-        if(_state.bonus.isActive && getElapsedBonusTime() > _state.bonus.maxTime) {
-            _state.bonus.isActive = false;
-        }
-
-        const isSpawnableScore = _state.score % BONUS_ENTITY_FREQUENCY === 0;
-        if(!isSpawnableScore && _state.bonus.isSpawned) {
-            _state.bonus.isSpawned = false;
-        }
-
-        const bonusEnabled = isSpawnableScore && _state.score >= BONUS_ENTITY_START_SCORE && !_state.bonus.isSpawned; // spawn bonuses every 3 scores after 21
-        if(bonusEnabled) {
-            createBonusEntities(1);
-            _state.bonus.isSpawned = true;
-        }
-
-        const bonusEntities = bonusEntityController.getActive();
-        bonusEntities.forEach((entity, i) => {
-            if(_state.inProgress) { // detect entity collisions
-                colorEntityController.updateEntityPosition(entity, _state.tickSpeed);
-                updateBonusEntityEdgeCollision(entity);
-            }
-            renderBonusEntity(entity);
         });
     }
 
@@ -330,6 +362,70 @@ export function createGameController({ canvas }) {
             entity.position.y = entity.radius; 
             entity.velocity.y *= -1;
         }
+    }
+
+    function updateBonusEntities() {
+        if(_state.bonus.isActive && getElapsedBonusTime() > _state.bonus.maxTime) {
+            _state.bonus.isActive = false;
+        }
+
+        const isSpawnableScore = _state.score % BONUS_ENTITY_FREQUENCY === 0;
+        if(!isSpawnableScore && _state.bonus.isSpawned) {
+            _state.bonus.isSpawned = false;
+        }
+
+        const bonusEnabled = isSpawnableScore && _state.score >= BONUS_ENTITY_START_SCORE && !_state.bonus.isSpawned; // spawn bonuses every 3 scores after 21
+        if(bonusEnabled) {
+            createBonusEntities(1);
+            _state.bonus.isSpawned = true;
+        }
+
+        const bonusEntities = bonusEntityController.getActive();
+        bonusEntities.forEach((entity, i) => {
+            if(_state.inProgress) { // detect entity collisions
+                colorEntityController.updateEntityPosition(entity, _state.tickSpeed);
+                updateBonusEntityEdgeCollision(entity);
+            }
+            renderBonusEntity(entity);
+        });
+    }
+
+    function getElapsedBonusTime() {
+        return _state.time - _state.bonus.startTime;
+    }
+
+    function setBonus(type) {
+        _state.bonus.type = type;
+        switch(type) {
+            case BONUS_TYPES.WILDCARD: {
+                _state.bonus.isActive = true;
+                _state.bonus.startTime = _state.time;
+                _state.bonus.maxTime = 3500;
+                break;
+            }
+            case BONUS_TYPES.LIFE: {
+                _state.lives++;
+                break;
+            }
+            case BONUS_TYPES.SLOW: {
+                const entities = colorEntityController.getAll()
+                entities.forEach((entity) => {
+                    if(entity.active) {
+                        entity.speed *= .8;
+                    }
+                });
+                break;
+            }
+        }
+    }
+
+    function isBonusActive() {
+        switch(_state.bonus.type) {
+            case BONUS_TYPES.WILDCARD: {
+                return _state.bonus.isActive && getElapsedBonusTime() < _state.bonus.maxTime;
+            }
+        }
+        return false;
     }
     
     function updateBonusEntityEdgeCollision(entity) {
@@ -416,19 +512,48 @@ export function createGameController({ canvas }) {
 
     function renderBonusEntity(entity) {
         if(entity.active) {
-            renderBonusEntityTrail(entity);
-            canvasController.drawCircle({
-                scale: CANVAS_PROPS.scale,
-                fill: entity.color,
-                radius: entity.radius,
-                stroke: entity.stroke,
-                strokeWidth: 3,
-                ...entity.position
-            });
+            switch(entity.data.bonusType) {
+                case BONUS_TYPES.WILDCARD: {
+                    renderWildcardEntityTrail(entity);
+                    canvasController.drawCircle({
+                        scale: CANVAS_PROPS.scale,
+                        fill: entity.color,
+                        radius: entity.radius,
+                        stroke: entity.stroke,
+                        strokeWidth: 5,
+                        ...entity.position
+                    });
+                    break;
+                }
+                case BONUS_TYPES.LIFE: {
+                    renderLifeEntityTrail(entity);
+                    canvasController.drawCircle({
+                        scale: CANVAS_PROPS.scale,
+                        fill: entity.color,
+                        radius: entity.radius,
+                        stroke: entity.stroke,
+                        strokeWidth: 5,
+                        ...entity.position
+                    });
+                    break;
+                }
+                case BONUS_TYPES.SLOW: {
+                    renderSlowEntityTrail(entity);
+                    canvasController.drawCircle({
+                        scale: CANVAS_PROPS.scale,
+                        fill: entity.color,
+                        radius: entity.radius,
+                        stroke: entity.stroke,
+                        strokeWidth: 5,
+                        ...entity.position
+                    });
+                    break;
+                }
+            }
         }
     }
 
-    function renderBonusEntityTrail(entity) {
+    function renderWildcardEntityTrail(entity) {
         const startingIndex = entity.historyLength - entity.historyLength / 2;
         const trailLength = entity.history.length - startingIndex;
         for(let i = startingIndex; i < entity.history.length; i += 4) {
@@ -443,8 +568,39 @@ export function createGameController({ canvas }) {
         }
     }
 
+    function renderLifeEntityTrail(entity) {
+        const startingIndex = entity.historyLength - entity.historyLength / 2;
+        const trailLength = entity.history.length - startingIndex;
+        for(let i = startingIndex; i < entity.history.length; i += 4) {
+            const { x, y } = entity.history[i];
+            canvasController.drawCircle({
+                fill: 'deeppink',
+                radius: (i - startingIndex) / trailLength * entity.radius,
+                alpha: .9,
+                x: x + CommonUtil.random(-.2, .2),
+                y: y + CommonUtil.random(-.2, .2)
+            });
+        }
+    }
+
+    function renderSlowEntityTrail(entity) {
+        const frequency = 2;
+        const frequencyLength = entity.history.length / frequency;
+        for(let i = 0; i < entity.history.length; i += frequency) {
+            const { x, y } = entity.history[i];
+            const scalar =  i / frequency;
+            canvasController.drawCircle({
+                fill: 'white',
+                radius: CommonUtil.random(scalar, scalar+2) / frequencyLength * entity.radius,
+                alpha: scalar / (frequencyLength * frequency),
+                x: x + CommonUtil.random(-1, 2),
+                y: y + CommonUtil.random(-1, 2)
+            });
+        }
+    }
+
     function renderBackground() {
-        canvasController.drawRect(BACKGROUND);
+        canvasController.drawRect(CANVAS_BACKGROUND);
     }
 
     function update({ tickSpeed, time }) {
@@ -461,10 +617,6 @@ export function createGameController({ canvas }) {
             x: CommonUtil.random(radius, width - radius),
             y: CommonUtil.random(radius, height - radius)
         }
-    }
-
-    function getElapsedBonusTime() {
-        return _state.time - _state.bonus.startTime;
     }
 
     return {

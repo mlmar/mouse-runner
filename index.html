@@ -15,6 +15,7 @@
     <body class="flex">
         <main id="app" class="flex flex-fill border-color">
             <label id="label-score" class="flex flex-fit color"> SCORE:&nbsp; <span> 0 </span> </label>
+            <label id="label-lives" class="flex flex-fit color floaty">  <span> 0 </span> &nbsp;&hearts;</label>
             <label id="label-high-score" class="flex flex-fit color"> <button id="button-share" class="color floaty"> LEADERBOARD &#10148; </button> HIGH SCORE:&nbsp; <span> 0 </span> </label>
             <canvas id="canvas-main"></canvas>
             <label id="label-start" class="color floaty">  CLICK ANYWHERE TO PLAY </label>
@@ -24,6 +25,9 @@
             </footer>
         </main>
         <article id="leaderboard" class="flex-col" style="display: none">
+            <section class="flex fit flex-end">
+                <button id="button-close" class="flex flex-middle flex-center"> <span> &times; </span> </button>
+            </section>
             <section id="scores-header" class="score-row">
                 <label> # </label>
                 <label> PLAYER </label>
