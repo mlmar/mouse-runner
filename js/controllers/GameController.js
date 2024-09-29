@@ -157,8 +157,7 @@ export function createGameController({ canvas }) {
                     entity = colorEntityController.create({ 
                         radius: BONUS_ENTITY_RADIUS * .6, 
                         speed: speed / 2, 
-                        color: 'deeppink',
-                        stroke: 'white', 
+                        color: 'white',
                         active: true,
                         position: randomExistingEntity ? VectorUtil.create(randomExistingEntity.position) : getRandomPosition(ENTITY_RADIUS),
                         velocity: VectorUtil.random(speed),

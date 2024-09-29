@@ -68,7 +68,13 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
         gameController.stop();
         gameLoop.stop();
         setTimeout(() => toggleOverlay(true), 10);
-        openLeaderboard();
+
+        const { score, highScore } = scoreTracker.get();
+        if(score >= highScore) {
+            openLeaderboard();
+        } else {
+            closeLeaderboard();
+        }
     }
 
     toggleOverlay(true);
