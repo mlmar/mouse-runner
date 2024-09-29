@@ -107,7 +107,7 @@ export function createGameController({ canvas }) {
         const entities = colorEntityController.getActive().slice(0);
         for(let i = 0; i < limit; i++) {
             const randomExistingEntity = entities[CommonUtil.random(0, entities.length, true)];
-            const speed = _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * Math.pow(_state.entitySpeedMutliplier * (_state.score + 1), 2);
+            const speed = getColorEntitySpeed();
             const entity = colorEntityController.create({ 
                 radius: ENTITY_RADIUS, 
                 speed: speed, 
@@ -122,6 +122,10 @@ export function createGameController({ canvas }) {
             });
             colorEntityController.add(entity);
         }
+    }
+
+    function getColorEntitySpeed() {
+        return _state.entitySpeedMutliplier + _state.entitySpeedMutliplier * _state.entitySpeedMutliplier * (_state.score)
     }
 
     function createBonusEntities(limit) {
