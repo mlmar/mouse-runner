@@ -14,7 +14,7 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
     const shareElement = El.find("#button-share");
     const startElement = El.find('#label-start');
     const creditsElement = El.find('#credits');
-    El.on(creditsElement, event => event.stopPropagation())
+    El.on(creditsElement, Events.MOUSE_DOWN, event => event.stopPropagation())
 
     const leaderboardElement = El.find('#leaderboard');
     const leaderboard = createLeaderboard(leaderboardElement);
