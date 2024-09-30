@@ -43,6 +43,7 @@ window.addEventListener(Events.DOM_CONTENT_LOADED, function() {
 
         const { inProgress, score, lives, borderColor } = gameController.get();
         scoreTracker.set(score);
+        leaderboard.setScore(score);
         colorElements(borderColor);
         El.css(scoreElement, { color: borderColor });
         El.text(El.findChild(scoreElement, 'span'), score);

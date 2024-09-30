@@ -15,23 +15,38 @@ export function createLeaderboard(el) {
     const closeElement = El.findChild(el, '#button-close')
 
     const _state = {
+        score: 0,
         name: localStorage.getItem(LocalStorageKeys.ORB_NAME_KEY) ?? '',
         color: localStorage.getItem(LocalStorageKeys.ORB_COLOR_KEY) ?? CommonUtil.randomColor(true),
-        submittedScore: localStorage.getItem(LocalStorageKeys.ORB_SUBMITTED_SCORE_KEY) ?? 0
+        submittedScore: getLastSubmission(),
+        hasSubmitted: false
+    }
+
+    function getLastSubmission() {
+        const stored = localStorage.getItem(LocalStorageKeys.ORB_SUBMITTED_SCORE_KEY);
+        if(stored) {
+            return JSON.parse(stored);
+        } else {
+            return null;
+        }
+    }
+
+    function setScore(score) {
+        _state.score = score;
     }
 
     async function handleSubmit() {
-        const score = localStorage.getItem(LocalStorageKeys.ORB_SCORE_KEY);
-        const res = await insertScore({
+        const data = {
             name: _state.name,
             color: _state.color,
-            score
-        });
+            score: _state.score
+        }
+        _state.submittedScore = data;
         localStorage.setItem(LocalStorageKeys.ORB_NAME_KEY, _state.name);
-        localStorage.setItem(LocalStorageKeys.ORB_SUBMITTED_SCORE_KEY, score);
-        _state.submittedScore = score;
-        appendScores(res.data.scores);
+        localStorage.setItem(LocalStorageKeys.ORB_SUBMITTED_SCORE_KEY, JSON.stringify(data));
         refreshSubmitButton();
+        const res = await insertScore(data);
+        appendScores(res.data.scores);
     }
 
     function handleNameChange(event) {
@@ -91,9 +106,14 @@ export function createLeaderboard(el) {
         El.disable(submitElement, !_state.name.length);
         El.toggleClass(submitElement, 'floaty', _state.name.length);
         El.css(submitElement, { color: _state.color });
-        // const parent = El.parent(submitElement);
-        // const currentScore = localStorage.getItem(LocalStorageKeys.ORB_SCORE_KEY) ?? 0;
-        // El.visible(parent, currentScore > _state.submittedScore);
+        if(_state.submittedScore) {
+            toggleSubmit(_state.submittedScore.name !== _state.name || _state.score !== _state.submittedScore.score);
+        }
+    }
+
+    function toggleSubmit(toggle) {
+        const parent = El.parent(submitElement);
+        El.visible(parent, toggle);
     }
 
     function refreshLeaderboardColor() {
@@ -129,6 +149,7 @@ export function createLeaderboard(el) {
 
     refresh();
     return {
-        refresh
+        refresh,
+        setScore
     }
 }

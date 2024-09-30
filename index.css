@@ -234,6 +234,19 @@ body {
     overflow: auto;
 }
 
+#leaderboard ::-webkit-scrollbar {
+    width: 10px;
+}
+
+#leaderboard ::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+#leaderboard ::-webkit-scrollbar-thumb {
+    background: white; 
+    cursor: pointer;
+}
+
 #leaderboard .score-row {
     display: flex;
     width: 100%;
